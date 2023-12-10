@@ -7,7 +7,7 @@ TILES = { 'S': [L,R,U,D],
           'F': [X,R,X,D],
           '7': [L,X,X,D] }
 
-def cord(i): return (i%COLS, i//COLS)
+def coord(i): return (i%COLS, i//COLS)
 def tile(c): return FILE[c[0]+c[1]*COLS]
 def vim(c): return (c[1]+1,c[0]+1)
 
@@ -28,26 +28,27 @@ FILE = open("input").read()
 COLS = FILE.index('\n') + 1
 ROWS = len(FILE)//COLS
 
-firstc = prevc = cord(FILE.index('S'))
+firstc = prevc = coord(FILE.index('S'))
 c = get_next(firstc, (-1,-1))
 
-cords = [firstc]
-cords.append(c)
+coords = [firstc]
+coords.append(c)
 
 i = 1
 while (c != firstc):
     tmp = c
     c = get_next(c, prevc)
     prevc = tmp
-    cords.append(c)
+    coords.append(c)
     i+=1
 print(i//2)
+me = coords[i//2]
 
 from matplotlib.path import Path
 i = 0
-path = Path(cords)
+path = Path(coords)
 for x in range(len(FILE)):
-    if not cord(x) in cords and path.contains_point(cord(x)):
+    if not coord(x) in coords and path.contains_point(coord(x)):
         i += 1
 print(i)
 
@@ -56,6 +57,8 @@ import matplotlib.patches as patches
 fig, ax = plt.subplots()
 patch = patches.PathPatch(path, facecolor='orange', lw=2)
 ax.add_patch(patch)
+ax.plot(firstc[0], firstc[1], "or")
+ax.plot(me[0], me[1], "og")
 ax.set_xlim(0, COLS)
 ax.set_ylim(0, ROWS)
 plt.show()
