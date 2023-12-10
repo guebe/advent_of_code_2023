@@ -1,7 +1,7 @@
-L = ['-','F','L','S']
-R = ['-','J','7','S']
-U = ['|','F','7','S']
-D = ['|','J','L','S']
+L = '-FLS'
+R = '-J7S'
+U = '|F7S'
+D = '|JLS'
 X = None
 TILES = { 'S': [L,R,U,D],
           '-': [L,R,X,X],
@@ -20,7 +20,7 @@ def neighbors(c):
     l = (x-1, y) if (x > 0) else None
     r = (x+1, y) if ((x+1) < COLS) else None
     u = (x, y-1) if (y > 0) else None
-    d = (x, y+1) if ((y+1) < COLS) else None
+    d = (x, y+1) if ((y+1) < ROWS) else None
     return (l, r, u, d) 
 
 def get_next(c, prevc):
@@ -30,6 +30,7 @@ def get_next(c, prevc):
 
 FILE = open("input").read()
 COLS = FILE.index('\n') + 1
+ROWS = len(FILE)//COLS
 
 firstc = prevc = cord(FILE.index('S'))
 c = get_next(firstc, (-1,-1))
