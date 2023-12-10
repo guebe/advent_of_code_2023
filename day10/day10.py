@@ -50,3 +50,12 @@ for x in range(len(FILE)):
     if not cord(x) in cords and path.contains_point(cord(x)):
         i += 1
 print(i)
+
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+fig, ax = plt.subplots()
+patch = patches.PathPatch(path, facecolor='orange', lw=2)
+ax.add_patch(patch)
+ax.set_xlim(0, COLS)
+ax.set_ylim(0, ROWS)
+plt.show()
