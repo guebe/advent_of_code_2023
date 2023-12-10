@@ -1,8 +1,4 @@
-L = '-FLS'
-R = '-J7S'
-U = '|F7S'
-D = '|JLS'
-X = None
+L = '-FLS'; R = '-J7S'; U = '|F7S'; D = '|JLS'; X = None
 TILES = { 'S': [L,R,U,D],
           '-': [L,R,X,X],
           '|': [X,X,U,D],
@@ -45,15 +41,12 @@ while (c != firstc):
     prevc = tmp
     cords.append(c)
     i+=1
-
 print(i//2)
 
 from matplotlib.path import Path
-
 i = 0
 path = Path(cords)
 for x in range(len(FILE)):
     if not cord(x) in cords and path.contains_point(cord(x)):
         i += 1
-
 print(i)
