@@ -9,7 +9,6 @@ TILES = { 'S': [L,R,U,D],
 
 def coord(i): return (i%COLS, i//COLS)
 def tile(c): return chr(mm[c[0]+c[1]*COLS])
-def vim(c): return (c[1]+1,c[0]+1)
 
 def neighbors(c):
     x,y = c
