@@ -31,8 +31,7 @@ ROWS = len(FILE)//COLS
 firstc = prevc = coord(FILE.index('S'))
 c = get_next(firstc, (-1,-1))
 
-coords = [firstc]
-coords.append(c)
+coords = [firstc, c]
 
 i = 1
 while (c != firstc):
@@ -45,12 +44,8 @@ print(i//2)
 me = coords[i//2]
 
 from matplotlib.path import Path
-i = 0
 path = Path(coords)
-for x in range(len(FILE)):
-    if not coord(x) in coords and path.contains_point(coord(x)):
-        i += 1
-print(i)
+print(sum(1 for x in range(len(FILE)) if not coord(x) in coords and path.contains_point(coord(x))))
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches

@@ -33,8 +33,7 @@ ROWS = mm.size()//COLS
 firstc = prevc = coord(mm.find(b'\x53'))
 c = get_next(firstc, (-1,-1))
 
-coords = [firstc]
-coords.append(c)
+coords = [firstc, c]
 
 i = 1
 while (c != firstc):
