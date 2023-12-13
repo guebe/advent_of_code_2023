@@ -3,23 +3,18 @@
 # like lines by transposing the matrix.
 import numpy as np
 
-def smudge_count(equals):
-    cnt = 0
-    for iy, ix in np.ndindex(equals.shape):
-        if equals[iy, ix] == False:
-            cnt += 1
-    return cnt
-
-def mirror_candidates(matrix):
+def mirrors(matrix, allowed_err):
     res = []
     prev = matrix[0]
     for i, line in enumerate(matrix[1:]):
-        if smudge_count(np.equal(line, prev)) <= 1:
+        cnt = np.sum(~np.equal(line, prev))
+        assert cnt >= 0
+        if cnt <= allowed_err:
             res.append(i+1)
         prev = line
     return res
 
-def fixup(matrix, mirrors):
+def fixup(matrix, mirrors, allowed_err):
     corrected = []
     for pos in mirrors:
         m = min(pos, len(matrix)-pos)
@@ -29,16 +24,24 @@ def fixup(matrix, mirrors):
         slice0 = matrix[start:pos,:]
         slice1 = matrix[pos:end,:]
         assert len(slice0) == len(slice1)
-        if smudge_count(np.equal(slice0, slice1[::-1])) == 1:
+        if np.sum(~np.equal(slice0, slice1[::-1])) == allowed_err:
             corrected.append(pos)
     return corrected
 
-ans = 0
+ans1 = 0
+ans2 = 0
 for section in open("input").read().split("\n\n"):
     matrix = np.matrix([list(line.strip()) for line in section.strip().split("\n")])
-    h = fixup(matrix, mirror_candidates(matrix))
-    v = fixup(np.transpose(matrix), mirror_candidates(np.transpose(matrix)))
+    tmatrix = np.transpose(matrix)
+    h = fixup(matrix, mirrors(matrix, 1), 0)
+    v = fixup(tmatrix, mirrors(tmatrix, 1), 0)
     assert len(h) + len(v) <= 1
-    ans += v[0] if v else 0
-    ans += 100*h[0] if h else 0
-print(ans)
+    ans1 += v[0] if v else 0
+    ans1 += 100*h[0] if h else 0
+    h = fixup(matrix, mirrors(matrix, 1), 1)
+    v = fixup(tmatrix, mirrors(tmatrix, 1), 1)
+    assert len(h) + len(v) <= 1
+    ans2 += v[0] if v else 0
+    ans2 += 100*h[0] if h else 0
+print(ans1)
+print(ans2)
