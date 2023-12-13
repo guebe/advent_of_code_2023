@@ -1,80 +1,44 @@
+# Find mirror candidates by comparing pairs of two consecutive lines. In a
+# second step check which candidates are really mirrors. Columns are handled
+# like lines by transposing the matrix.
 import numpy as np
-import sys
 
-file = open("input").read()
+def smudge_count(equals):
+    cnt = 0
+    for iy, ix in np.ndindex(equals.shape):
+        if equals[iy, ix] == False:
+            cnt += 1
+    return cnt
 
-sections = file.split("\n\n")
-
-def get_split(matrix):
+def mirror_candidates(matrix):
     res = []
-    i = 0
     prev = matrix[0]
-    #print(prev)
-    for line in matrix[1:]:
-        e = np.equal(line, prev)
-        errcnt = 0
-        for iy, ix in np.ndindex(e.shape):
-            if e[iy, ix] == False:
-                errcnt += 1
-        if (errcnt <= 1):
+    for i, line in enumerate(matrix[1:]):
+        if smudge_count(np.equal(line, prev)) <= 1:
             res.append(i+1)
-            #print(f">>>>")
-        #print(line)
         prev = line
-        i += 1
-    #print("")
     return res
 
-def correct_splits(matrix, vs):
-    v1 = []
-    for v in vs:
-        l1 = v
-        l2 = len(matrix)-v
-        m = min(l1, l2)
-        s = (l1 - m)
-        e = min(v + m, len(matrix))
-        #print(f"min({v} + {m}, {len(matrix)})")
-        #print(f"{s} {v} {e}")
-        assert(s < v < e)
-        assert(s >= 0)
-        assert(e <= len(matrix))
-        x0 = matrix[s:v,:]
-        x1 = matrix[v:e,:]
-        #print(x0)
-        #print()
-        #print(x1)
-        assert (len(x0) == len(x1))
-        #if np.array_equal(x0, x1[::-1]):
-        #    v1.append(v)
-        e = np.equal(x0, x1[::-1])
-        errcnt = 0
-        for iy, ix in np.ndindex(e.shape):
-            if e[iy, ix] == False:
-                errcnt += 1
-        if errcnt == 1:
-            v1.append(v)
-
-    return v1
+def fixup(matrix, mirrors):
+    corrected = []
+    for pos in mirrors:
+        m = min(pos, len(matrix)-pos)
+        start = pos - m
+        end = min(pos + m, len(matrix))
+        assert 0 <= start < pos < end <= len(matrix)
+        slice0 = matrix[start:pos,:]
+        slice1 = matrix[pos:end,:]
+        assert len(slice0) == len(slice1)
+        if smudge_count(np.equal(slice0, slice1[::-1])) == 1:
+            corrected.append(pos)
+    return corrected
 
 ans = 0
-i = 0
-for section in sections:
-    section = section.strip().split("\n")
-    print("")
-    for line in section:
-        print(line)
-    matrix = np.matrix([list(line.strip()) for line in section])
-    v = get_split(matrix)
-    h = get_split(np.transpose(matrix))
-    print(f"section {i} {v} {h}")
-    v1 = correct_splits(matrix, v)
-    h1 = correct_splits(np.transpose(matrix), h)
-    print(f"corrected {v1} {h1}")
-    assert((len(h1) + len(v1)) <= 1)
-    if len(h1) > 0:
-        ans += h1[0]
-    if len(v1) > 0:
-        ans += 100*v1[0]
-    print(ans)
-    i += 1
-
+for section in open("input").read().split("\n\n"):
+    matrix = np.matrix([list(line.strip()) for line in section.strip().split("\n")])
+    h = fixup(matrix, mirror_candidates(matrix))
+    v = fixup(np.transpose(matrix), mirror_candidates(np.transpose(matrix)))
+    assert len(h) + len(v) <= 1
+    ans += v[0] if v else 0
+    ans += 100*h[0] if h else 0
+print(ans)
