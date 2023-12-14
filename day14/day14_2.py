@@ -30,7 +30,7 @@ i = 0
 while i < 1000000000:
     print(f"cycle {i}")
     cycle(a)
-    h = hash(tuple(["".join(l) for l in list(a)]))
+    h = hash(tuple(["".join(x) for x in a]))
     if h in cache:
         i = 1000000000 - (1000000000 - i) % (i - cache[h])
     cache[h] = i
