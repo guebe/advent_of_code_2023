@@ -1,9 +1,11 @@
 import numpy as np
 
 def weight(a):
+    a = np.rot90(a, k=1);
     res = 0
     for x in a:
         res += sum(len(x)-i if s=='O' else 0 for i,s in enumerate(x))
+    a = np.rot90(a, k=-1);
     return res
 
 def slide(a):
@@ -17,6 +19,5 @@ def slide(a):
                     do_work = True
 
 a = np.array([list(line.strip()) for line in open("input").readlines()])
-a = np.transpose(a)
-slide(a)
+a = np.rot90(a, k=1); slide(a); a = np.rot90(a, k=-1) # north
 print(weight(a))
