@@ -1,23 +1,22 @@
 import numpy as np
 
-def slide(x):
-    weight = 0
-    o, e, n = [], [], []
-    for s in x:
-        if s == '#':
-            weight += sum(len(x) - len(n) - i for i, _ in enumerate(o))
-            n += o + e + ['#']
-            o, e = [], []
-        elif s == '.':
-            e.append('.')
-        elif s == 'O':
-            o.append('O')
-    weight += sum(len(x) - len(n) - i for i, _ in enumerate(o))
-    return weight, n + o + e
+def weight(a):
+    res = 0
+    for x in a:
+        res += sum(len(x)-i if s=='O' else 0 for i,s in enumerate(x))
+    return res
 
-def slide_array(a):
-    return sum(slide(x)[0] for x in a)
+def slide(a):
+    for x in a:
+        do_work = True
+        while (do_work):
+            do_work = False
+            for i in range(1,len(x)):
+                if (x[i-1] == "." and x[i] == "O"):
+                    x[i-1], x[i] = x[i], x[i-1]
+                    do_work = True
 
 a = np.array([list(line.strip()) for line in open("input").readlines()])
 a = np.transpose(a)
-print(slide_array(a))
+slide(a)
+print(weight(a))
