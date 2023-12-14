@@ -1,51 +1,25 @@
 import numpy as np
 
-def slide_rocks(x):
-    LEN = len(x)
-    i = LEN
-    res = 0
-    O = []
-    e = []
-    n = []
+def weight(x):
+    return sum(len(x)-i if s=='O' else 0 for i,s in enumerate(x))
+
+def slide(x):
+    O, e, n = [], [], []
     for s in x:
         if s == '#':
-            if len(O) > 0:
-                print((len(O), i, res))
-                for x in O:
-                    res += i
-                    i -= 1
-            n += O
-            n += e
-            n.append('#')
-            i = LEN - len(n)
-            e=[]
-            O=[]
+            n += O + e + ['#']
+            O, e = [], []
         elif s == '.':
             e.append('.')
         elif s == 'O':
             O.append('O')
-    if len(O) > 0:
-        print((len(O), i, res))
-        for x in O:
-            res += i
-            i -= 1
-    n += O
-    n += e
-    return n, res
+    return n + O + e
 
 a = np.array([list(line.strip()) for line in open("input").readlines()])
-
-print(a)
-print("")
-b = np.transpose(a)
-print(b)
-print("")
+a = np.transpose(a)
 
 ans1 = 0
-for x in b:
-    c, res = slide_rocks(x)
-    ans1 += res
-    print(res)
-    print(np.array(c))
+for x in a:
+    ans1 += weight(slide(x))
 
 print(ans1)
