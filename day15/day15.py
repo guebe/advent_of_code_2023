@@ -1,19 +1,15 @@
-a = open("input").readline().strip()
-b = a.split(",")
+a = open("input").readline().strip().split(",")
 
 def hash(a):
-    print(a)
     s = 0
     for i in range(len(a)):
-        c = a[i]
-        o = ord(c)
-        s += o
+        s += ord(a[i])
         s *= 17
         s %= 256
     return s
 
 res = 0
-for x in b:
+for x in a:
     res += hash(x)
 print(res)
 
