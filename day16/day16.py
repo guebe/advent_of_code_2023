@@ -1,68 +1,56 @@
 import numpy as np
 
 a = np.array([list(line.strip()) for line in open("input").readlines()])
+LEN = len(a) # ATTENTION: only works for arrays of same dimensional length
 
-# moves the beam in its previous direction
-def move(b):
-    return (b[0]+b[2], b[1]+b[3], b[2], b[3])
+# moves the beam forward along its current direction
+def forward(b):
+    x, y, dx, dy = b
+    return (x+dx, y+dy, dx, dy)
 
-# changes the direction of a beam because of a reflection
-def move2(b, dx, dy):
-    return move((b[0], b[1], dx, dy))
+# changes the direction of the beam sideways because of a reflection
+def change(b, dx, dy):
+    x, y, *_ = b
+    return forward((x, y, dx, dy))
 
-def step(b):
-    tile = a[b[1]][b[0]]
-    if (tile == '.'): # carry on
-        return [move(b)]
-    elif (tile == '\\'): # reflect beam in one dir
-        return [move2(b,b[3],b[2])]
-    elif (tile == '/'): # reflect beam in one dir
-        return [move2(b,-b[3],-b[2])]
-    elif (tile == '|'):
-        if b[3] != 0:
-            return [move(b)] # beam is like '.' in this dir
-        else: # reflect beam in two dirs
-            return [move2(b,0,1), move2(b,0,-1)]
-    elif (tile == '-'):
-        if b[2] != 0:
-            return [move(b)] # beam is like '.' in this dir
-        else: # reflect beam in two dirs
-            return [move2(b,1,0), move2(b,-1,0)]
+# get the next beam position and direction
+# [.]  carry on in same direction
+# [\/] change direction
+# [-|] duplicate beam or handle like [.] depending on direction
+# returns one or two new beams
+def one_step(b):
+    x, y, dx, dy = b
+    match a[y][x]:
+        case '.': return [forward(b)]
+        case '\\': return [change(b,dy,dx)]
+        case '/': return [change(b,-dy,-dx)]
+        case '|': return [forward(b)] if (dy != 0) else [change(b,0,1), change(b,0,-1)]
+        case '-': return [forward(b)] if (dx != 0) else [change(b,1,0), change(b,-1,0)]
 
-def len_energized(bs):
-    bbbs = set() # storing visited tiles position - to count later
-    bbbbs = set() # storing visited tiles position and direction to find cycles
-    # add initial tile
-    bbbs.add((bs[0][0], bs[0][1]))
-    bbbbs.add(bs[0])
+def energy(b):
+    x, y, *_ = b
+    bs = [b] # beams
+    sbs = {b} # set of visited beams positions and directions to find cycles
+    ebs = {(x,y)} # set of visited beam positions to get energy
     while bs:
-        b = bs.pop(0)
-        for bbs in step(b): # one or two new beams
-            # the beam may reached the end or the beam may be a cycle
-            if (0 <= bbs[0] < len(a)) and (0 <= bbs[1] < len(a)) and bbs not in bbbbs:
-                bs.append(bbs)
-                bbbs.add((bbs[0], bbs[1]))
-                bbbbs.add(bbs)
-        #print(bs)
-    return len(bbbs)
+        for b in one_step(bs.pop(0)):
+            x, y, *_ = b
+            # check position in range and not a cycle
+            if (0 <= x < LEN) and (0 <= y < LEN) and b not in sbs:
+                bs.append(b)
+                sbs.add(b)
+                ebs.add((x, y))
+    return len(ebs)
 
-print(len_energized([(0,0,1,0)])) # x,y,dx,dy
+print(energy((0,0,1,0))) # x,y,dx,dy
 
-maxx = 0
-for i in range(len(a[0])):
-    tmp = len_energized([(0,i,1,0)])
-    maxx = tmp if tmp > maxx else maxx
-
-for i in range(len(a[0])):
-    tmp = len_energized([(i,0,0,1)])
-    maxx = tmp if tmp > maxx else maxx
-
-for i in range(len(a[0])):
-    tmp = len_energized([(len(a[0])-1,i,-1,0)])
-    maxx = tmp if tmp > maxx else maxx
-
-for i in range(len(a[0])):
-    tmp = len_energized([(i,len(a[0])-1,0,-1)])
-    maxx = tmp if tmp > maxx else maxx
-
-print(maxx)
+res = 0
+for i in range(LEN):
+    res = max(energy((0,i,1,0)), res)
+for i in range(LEN):
+    res = max(energy((i,0,0,1)), res)
+for i in range(LEN):
+    res = max(energy((LEN-1,i,-1,0)), res)
+for i in range(LEN):
+    res = max(energy((i,LEN-1,0,-1)), res)
+print(res)
