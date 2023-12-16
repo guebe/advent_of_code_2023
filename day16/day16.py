@@ -47,10 +47,7 @@ print(energy((0,0,1,0))) # x,y,dx,dy
 res = 0
 for i in range(LEN):
     res = max(energy((0,i,1,0)), res)
-for i in range(LEN):
     res = max(energy((i,0,0,1)), res)
-for i in range(LEN):
     res = max(energy((LEN-1,i,-1,0)), res)
-for i in range(LEN):
     res = max(energy((i,LEN-1,0,-1)), res)
 print(res)
