@@ -1,77 +1,76 @@
-coords = []
-point = (0,0)
-coords.append(point)
-outline = 0
-xmax = 0
-ymax = 0
-xmin = 0
-ymin = 0
+# https://en.wikipedia.org/wiki/Shoelace_formula
+def triangle_formula(coords):
+    A = 0
+    for i in range(1, len(coords)):
+        x1, y1 = coords[i - 1]
+        x2, y2 = coords[i]
+        A += x1*y2 - x2*y1
+    A = abs(A // 2)
+    return A
 
-for line in open("input").readlines():
-    line = line.strip()
-    line = line.split()
-    #print(line)
+# https://en.wikipedia.org/wiki/Pick%27s_theorem
+def picks_theorem(A, b):
+    i = A - b//2 + 1
+    return i
 
-    direction, length, color = line
-    length = int(length)
-    x, y = point
+def parse_file():
+    lines = []
+    for line in open("input").readlines():
+        direction, length, color = line.strip().split()
+        length = int(length)
+        lines.append((direction, length, color))
+    return lines
 
-    xxx = len(coords)
-    if (direction == 'R'):
-        for i in range(length):
-            x += 1
-            coords.append((x,y))
-    elif (direction == 'L'):
-        for i in range(length):
-            x -= 1
-            coords.append((x,y))
-    elif (direction == 'U'):
-        for i in range(length):
-            y -= 1 
-            coords.append((x,y))
-    elif (direction == 'D'):
-        for i in range(length):
-            y += 1 
-            coords.append((x,y))
+def coordinates(lines):
+    x, y = 0, 0
+    coords = [(x, y)]
+    outline = 0
+    for direction, length, color in lines:
+        if (direction == 'R'):   x += length
+        elif (direction == 'L'): x -= length
+        elif (direction == 'D'): y += length
+        elif (direction == 'U'): y -= length
+        coords.append((x, y))
+        outline += length
+    return coords, outline
 
-    for i in range(xxx, len(coords)):
-        x, y = coords[i]
-        print(f"({x}, {y}) ", end="") 
-    print("")
+def fix_lines(lines):
+    fixup = []
+    for direction, length, color in lines:
+        length = int(color[2:-2],16)
+        direction = ['R', 'D', 'L', 'U'][int(color[len(color)-2])]
+        fixup.append((direction, length, color))
+    return fixup
 
-    if (y > ymax):
-        ymax = y
-    if (x > xmax):
-        xmax = x
-    if (y < ymin):
-        ymin = y
-    if (x < xmin):
-        xmin = x
+def min_max(coords):
+    xmin, xmax = 0x7FFFFFFF, -0x80000000
+    ymin, ymax = 0x7FFFFFFF, -0x80000000
+    for x, y in coords:
+        xmin = min(x, xmin)
+        xmax = max(x, xmax)
+        ymin = min(y, ymin)
+        ymax = max(y, ymax)
+    return xmin, xmax, ymin, ymax
 
-    point = (x,y)
-    outline += length
-    print(f"{point} {outline} {direction}")
+def plot(coords):
+    from matplotlib.path import Path
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+    patch = patches.PathPatch(Path(coords), facecolor='orange', lw=2)
+    fig, ax = plt.subplots()
+    ax.add_patch(patch)
+    xmin, xmax, ymin, ymax = min_max(coords)
+    ax.set_xlim(xmin-1, xmax+1)
+    ax.set_ylim(ymin-1, ymax+1)
+    plt.show()
 
-print(f"{xmax} {ymax}")
-print(f"{xmin} {ymin}")
+lines = parse_file()
+coords, outline = coordinates(lines)
+interior = picks_theorem(triangle_formula(coords), outline)
+print(interior + outline)
+plot(coords)
 
-s = 0
-from matplotlib.path import Path
-path = Path(coords)
-for y in range(ymin-1,ymax+1):
-    for x in range(xmin-1,xmax+1):
-        if path.contains_point((x, y)) and not (x,y) in coords:
-            #print(f"inside ({x}, {y})")
-            s += 1
-print(outline)
-print(s)
-print(s+outline)
-
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-fig, ax = plt.subplots()
-patch = patches.PathPatch(path, facecolor='orange', lw=2)
-ax.add_patch(patch)
-ax.set_xlim(xmin-1, xmax+1)
-ax.set_ylim(ymin-1, ymax+1)
-plt.show()
+coords, outline = coordinates(fix_lines(lines))
+interior = picks_theorem(triangle_formula(coords), outline)
+print(interior + outline)
+plot(coords)
